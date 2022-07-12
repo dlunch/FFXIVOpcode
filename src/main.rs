@@ -1,12 +1,9 @@
 mod disassemble;
+mod finder;
 mod patterns;
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use clap::Parser;
-use memchr::memmem::Finder;
-use object::{Object, ObjectSection};
-use tokio::fs;
-
 #[derive(Parser)]
 struct Args {
     file_name: String,
@@ -18,27 +15,10 @@ async fn main() -> Result<()> {
 
     let args = Args::parse();
 
-    let file = fs::read(args.file_name).await?;
-    let object = object::File::parse(&*file)?;
-    let text_section = object.section_by_name(".text").ok_or_else(|| anyhow!("No .text section"))?;
+    let finder = finder::Finder::new(&args.file_name).await?;
 
-    let code = text_section.data()?;
-
-    let dispatch = search_pattern(code, &patterns::DISPATCH_PACKET_PATTERN).unwrap();
-    println!("dispatch: {:x}", text_section.address() + dispatch as u64);
-
-    let dispatch_insns = disassemble::disassemble_method(&code[dispatch..], text_section.address())?;
-
-    println!("{:x?}", dispatch_insns[0].bytes);
-
-    let move_handler = search_pattern(code, &patterns::HANDLE_MOVE_PATTERN).unwrap();
-    println!("move_handler: {:x}", text_section.address() + move_handler as u64);
+    let move_opcode = finder.find_opcode(&patterns::HANDLE_MOVE_PATTERN);
+    println!("{:?}", move_opcode);
 
     Ok(())
-}
-
-fn search_pattern(code: &[u8], pattern: &[u8]) -> Option<usize> {
-    let finder = Finder::new(pattern);
-
-    finder.find(code)
 }
