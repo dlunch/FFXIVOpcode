@@ -27,9 +27,12 @@ async fn main() -> Result<()> {
     let dispatch = search_pattern(code, &patterns::DISPATCH_PACKET_PATTERN).unwrap();
     println!("dispatch: {:x}", text_section.address() + dispatch as u64);
 
-    let insns = disassemble::disassemble_method(&code[dispatch..], text_section.address())?;
+    let dispatch_insns = disassemble::disassemble_method(&code[dispatch..], text_section.address())?;
 
-    println!("{:x?}", insns[0].bytes);
+    println!("{:x?}", dispatch_insns[0].bytes);
+
+    let move_handler = search_pattern(code, &patterns::HANDLE_MOVE_PATTERN).unwrap();
+    println!("move_handler: {:x}", text_section.address() + move_handler as u64);
 
     Ok(())
 }
