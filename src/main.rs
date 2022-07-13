@@ -17,8 +17,10 @@ async fn main() -> Result<()> {
 
     let finder = finder::Finder::new(&args.file_name).await?;
 
-    let move_opcode = finder.find_opcode(&patterns::HANDLE_MOVE_REGION_PATTERN);
-    println!("{:?}", move_opcode);
+    println!("pcinfo: {}", finder.find_opcode(&patterns::HANDLE_PCINFO_PATTERN).unwrap());
+    println!("move: {}", finder.find_opcode(&patterns::HANDLE_MOVE_REGION_PATTERN).unwrap());
+    println!("social: {}", finder.find_opcode(&patterns::HANDLE_SOCIAL_PATTERN).unwrap());
+    println!("eobj: {}", finder.find_opcode(&patterns::HANDLE_EOBJ_PATTERN).unwrap());
 
     Ok(())
 }

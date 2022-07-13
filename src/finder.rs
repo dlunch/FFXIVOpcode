@@ -81,7 +81,7 @@ impl Finder {
 
     fn find_dispatch_xref_insn(&self, handler_base: u64) -> Option<usize> {
         for (i, insn) in self.dispatch_insns.iter().enumerate() {
-            if insn.mnemonic == x86::X86Insn::X86_INS_CALL {
+            if insn.mnemonic == x86::X86Insn::X86_INS_CALL || insn.mnemonic == x86::X86Insn::X86_INS_JMP {
                 if let x86::X86OperandType::Imm(imm) = insn.operands[0].op_type {
                     if imm as u64 == handler_base {
                         return Some(i);
